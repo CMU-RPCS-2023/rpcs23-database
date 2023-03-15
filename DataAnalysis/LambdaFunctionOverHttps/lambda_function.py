@@ -45,20 +45,6 @@ def lambda_handler(event, context):
       - payload: a JSON object containing parameters to pass to the 
                  operation being performed
     '''
-    
-    def return_message(message):
-        ret = {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
-                "Access-Control-Allow-Credentials" : True
-            },
-            'body': message
-        }
-        return ret
 
     # define the functions used to perform the CRUD operations
     def ddb_create(x):
@@ -139,6 +125,6 @@ def lambda_handler(event, context):
     }
 
     if operation in operations:
-        return return_message(operations[operation](event.get('payload')))
+        return operations[operation](event.get('payload'))
     else:
         raise ValueError('Unrecognized operation "{}"'.format(operation))

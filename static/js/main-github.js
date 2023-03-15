@@ -24,7 +24,8 @@ window.onload = function ()
     };
     console.log(data)
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        if (response.message !== 'server is ok') {
+        console.log(response)
+        if (response !== 'server is ok') {
             document.getElementById('server-check-warning').style.display = 'block'
         }
     }).catch(function(error) {
@@ -33,12 +34,48 @@ window.onload = function ()
     })
 }
 
-$('#single').on('click', function(ev) {
+$('#get_simulation_btn').on('click', function(ev) {
     console.log(ev.target)
-    $.ajax(ajaxSetting('check-using', 'test')).done(function(response) {
+    data = {
+        "operation": "get_simulation",
+        "payload": {
+            "SimulationId": $("#get_simulation")[0].value
+        }
+    }
+    $.ajax(ajaxSetting('', data)).done(function(response) {
         console.log(response)
+        $("#response")[0].innerHTML = JSON.stringify(response)
     })
 })
+
+$('#add_simulation_btn').on('click', function(ev) {
+    console.log(ev.target)
+    data = {
+        "operation": "add_simulation",
+        "payload": {
+            "SimulationId": $("#add_simulation")[0].value
+        }
+    }
+    $.ajax(ajaxSetting('', data)).done(function(response) {
+        console.log(response)
+        $("#response")[0].innerHTML = JSON.stringify(response)
+    })
+})
+
+$('#delete_simulation_btn').on('click', function(ev) {
+    console.log(ev.target)
+    data = {
+        "operation": "delete_simulation",
+        "payload": {
+            "SimulationId": $("#delete_simulation")[0].value
+        }
+    }
+    $.ajax(ajaxSetting('', data)).done(function(response) {
+        console.log(response)
+        $("#response")[0].innerHTML = JSON.stringify(response)
+    })
+})
+
 
 function addAlert(content, type) {
     alertID = Date.now()
