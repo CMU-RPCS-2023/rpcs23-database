@@ -1,0 +1,120 @@
+body {
+    background-color: whitesmoke;
+}
+
+h1 {
+    padding: 30px;
+}
+
+/* h3 {
+    padding-left: 40px;
+}
+h5 {
+    padding-left: 40px;
+} */
+#setConnection {
+    max-width: 700px;
+    margin: auto;
+    padding: 30px;
+}
+
+.btnComfirm {
+    float: right;
+}
+
+/* #queryADO {
+    padding: 70px;
+} */
+
+.addKeywordRow {
+    max-width: 500px;
+}
+
+#queryADOcontent {
+    padding: 30px 0px;
+}
+
+#alertBox {
+    position: absolute;
+    right: 3%;
+    top: 7%;
+    z-index: 1080;
+}
+
+.dot {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+#adoTable {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.tableInput {
+    width: 250px;
+}
+
+.workitemElement {
+    max-height: 100px;
+    overflow-y: auto;
+    max-width: 500px;
+}
+
+#adoBtn {
+    text-align: right;
+}
+
+#adoBtnDownload {
+    text-align: right;
+}
+
+#queryADOorganization {
+    display: inline;
+    margin-right: 10px;
+}
+
+#addedTag {
+    min-height: 60px;
+    display: inline;
+}
+
+.addedTagPill {
+    margin: 5px;
+    padding: 10px;
+    font-size: 1rem;
+}
+.addedTagDelete {
+    background-color: #ccccccbc;
+    border: none;
+    border-radius: 30px;
+    height: 30px;
+    width: 30px;
+    margin-right: 5px;
+}
+
+.addedTagDelete:hover {
+    background-color: #eeeeee
+}
+.addedTagDelete:active {
+    border: none;
+}
+
+#addTagBtn {
+    font-size: 1.2rem;
+}
+
+#addTagInput {
+    height: inherit;
+}
+
+form {
+    padding: 0px 20px;
+}
+
+#single-div {
+    padding: 40px;
+}
