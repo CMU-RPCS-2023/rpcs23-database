@@ -94,14 +94,30 @@ window.onload = function ()
     }, null, 4)
     $("#get_simulation")[0].value = JSON.stringify({
         "SimulationId": "Test123",
-    })
+    }, null, 4)
+    $("#get_simulation_filtered")[0].value = JSON.stringify({
+        "SimulationId": "ExampleGraphTest",
+        "content": ["Speed", "ServoAngle", "Accel"]
+    }, null, 4)
     $("#delete_simulation")[0].value = JSON.stringify({
         "SimulationId": "Test123",
-    })
+    }, null, 4)
 }
 
 $('#get_simulation_btn').on('click', function(ev) {
     payload = JSON.parse($("#get_simulation")[0].value)
+    data = {
+        "operation": "get_simulation",
+        "payload": payload
+    }
+    $.ajax(ajaxSetting('', data)).done(function(response) {
+        $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
+    })
+})
+
+
+$('#get_simulation_filtered_btn').on('click', function(ev) {
+    payload = JSON.parse($("#get_simulation_filtered")[0].value)
     data = {
         "operation": "get_simulation",
         "payload": payload

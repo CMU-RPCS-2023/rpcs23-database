@@ -61,6 +61,9 @@
 
             <h3>Usage:</h3>
             <ol>
+              <li>Get Filtered Data for HCI team:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "get_simulation", "payload": {"SimulationId": "ExampleGraphTest", "content": ["Speed", "ServoAngle", "Accel"]}}'</code></pre>
+              </li>
               <li>create:
                 <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "create", "payload": {"Item": {"id": "TestCreate1", "number": 1234}}}'</code></pre>
               </li>
