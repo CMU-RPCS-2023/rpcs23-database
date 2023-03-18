@@ -34,32 +34,6 @@ window.onload = function ()
     })
 }
 
-$('#get_simulation_btn').on('click', function(ev) {
-    console.log(ev.target)
-    SimulationId = $("#get_simulation_id")[0].value
-    options = $("#get_simulation_content")[0].options
-    content = []
-    for (var i = 0; i < options.length; i++) {
-        if (options[i].selected) {
-            content.push(options[i].value)
-        }
-    }
-    console.log(SimulationId)
-    console.log(content)
-    payload = {
-        "SimulationId": SimulationId,
-        "content": content
-    }
-    data = {
-        "operation": "get_simulation",
-        "payload": payload
-    }
-    $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
-        $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
-    })
-})
-
 
 function addAlert(content, type) {
     alertID = Date.now()

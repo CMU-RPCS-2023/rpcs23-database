@@ -1,0 +1,97 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>18745 RP Data Analysis Demo</title>
+    <meta name="description" content="18745 RP Data Analysis Demo project page">
+    <meta name="author" content="Jhao-Ting Chen">
+
+    <meta property="og:title" content="18745 RP Data Analysis Demo">
+    <meta property="og:type" content="website">
+    <meta name="description" content="18745 RP Data Analysis Demo project page">
+
+    <link rel="icon" href="/favicon.ico">
+    <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+    <link rel="stylesheet" href="static/css/bootstrap.css">
+    <link rel="stylesheet" href="static/css/index.css">
+</head>
+
+<body>
+    <!-- your content here... -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand">18745 RP Data Analysis Demo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745">Home <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745/simulations.html">Simulations <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745/database.html">Database <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                  <a class="nav-link" href="/cmu-18745/doc.html">Documentation <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <div style="text-align: center;">
+            <h1>18745 RP Data Analysis Demo</h1>
+            <!-- <h5>If something is wrong (etc. CORS block, http issue, ... ), please go to my server <a
+                    href="https://180.176.5.132:5003/">https://180.176.5.132:5003/</a>.</h5> -->
+            <div>
+                <div class="alert alert-warning" role="alert" id="server-check-warning" style="display: none; margin: 0px 20px;">
+                    The server is currently not responding (Maybe CORS). <br />
+                </div>
+            </div>
+
+        </div>
+        <div class="container">
+
+            <h3>Usage:</h3>
+            <ol>
+              <li>create:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "create", "payload": {"Item": {"id": "TestCreate1", "number": 1234}}}'</code></pre>
+              </li>
+              <li>read:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "read", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
+              </li>
+              <li>update:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "update", "payload": {"Key": {"id": "TestCreate1"}, "AttributeUpdates": {"number": {"Value": [{"test1": "val1", "key2": "val2"}]}}}}'</code></pre>
+              </li>
+              <li>delete:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
+              </li>
+              <li>add_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "add_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+              <li>get_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "get_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+              <li>delete_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <script src="static/js/resourses/jquery-3.5.1.min.js"></script>
+    <script src="static/js/resourses/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <script src="static/js/doc.js"></script>
+</body>
+
+</html>

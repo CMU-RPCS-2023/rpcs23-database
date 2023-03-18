@@ -32,6 +32,73 @@ window.onload = function ()
         console.log(error)
         document.getElementById('server-check-warning').style.display = 'block'
     })
+
+    $("#add_simulation")[0].value = JSON.stringify({
+        "id": "Test123",
+        "SimulationId": "Test123",
+        "SimulationName": "Test Simulation Created by Jhao-Ting Chen",
+        "StartTime": "2023-03-17T00:52:14",
+        "EndTime": "2023-03-18T00:52:14",        
+        "CarId": "Tesla",
+        "TrackId": "easy1",
+        "SensorLog": [
+            {
+                "Timestamp": "2023-03-17T15:23:14",
+                "SensorType": "GPS",
+                "Value": {"Lat": 22.3, "Lng": 12.32}
+            }
+        ],
+        "CarLog": [
+            {
+                "Timestamp": "2023-03-17T15:23:14",
+                "CarStatus": "on",
+                "Speed": 43,
+                "Position": {
+                    "x": 12.3,
+                    "y": 12.3,
+                    "z": 12.3
+                },
+                "Yaw": {
+                    "x": 12.3,
+                    "y": 12.3,
+                    "z": 12.3
+                },
+                "Pitch": {
+                    "x": 12.3,
+                    "y": 12.3,
+                    "z": 12.3
+                },
+                "Roll": {
+                    "x": 12.3,
+                    "y": 12.3,
+                    "z": 12.3
+                },
+                "Accel": {
+                    "x": 12.3,
+                    "y": 12.3,
+                    "z": 12.3
+                },
+                "Direction": 180,
+                "ServoAngle": 56,
+                "EngineTemperature": 72,
+                "RPM": 30
+            }
+        ],
+        "EventLog": [
+            {
+                "Timestamp": "2023-03-17T15:23:14",
+                "EventType": "Collision",
+                "Risk": 2,
+                "ErrorMessage": "Hit a Tree"
+            }
+        ],
+    }, null, 4)
+    $("#get_simulation")[0].value = JSON.stringify({
+        "SimulationId": "Test123",
+    })
+    $("#delete_simulation")[0].value = JSON.stringify({
+        "SimulationId": "Test123",
+    })
 }
 
 $('#get_simulation_btn').on('click', function(ev) {

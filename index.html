@@ -34,10 +34,13 @@
                     <a class="nav-link" href="/cmu-18745">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/cmu-18745/simulations.html">Simulations <span class="sr-only"></span></a>
+                    <a class="nav-link" href="/cmu-18745/simulations.html">Simulations <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/cmu-18745/database.html">Database <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/cmu-18745/doc.html">Documentation <span class="sr-only"></span></a>
                 </li>
             </ul>
         </div>
@@ -45,8 +48,7 @@
     <div>
         <div style="text-align: center;">
             <h1>18745 RP Data Analysis Demo</h1>
-            <!-- <h5>If something is wrong (etc. CORS block, http issue, ... ), please go to my server <a
-                    href="https://180.176.5.132:5003/">https://180.176.5.132:5003/</a>.</h5> -->
+            <h3>Get Raw Simulation Data</h3>
             <div>
                 <div class="alert alert-warning" role="alert" id="server-check-warning" style="display: none; margin: 0px 20px;">
                     The server is currently not responding (Maybe CORS). <br />
@@ -55,31 +57,41 @@
 
         </div>
         <div class="container">
-
-            <h3>Usage:</h3>
-            <ol>
-              <li>create:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "create", "payload": {"Item": {"id": "TestCreate1", "number": 1234}}}'</code></pre>
-              </li>
-              <li>read:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "read", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
-              </li>
-              <li>update:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "update", "payload": {"Key": {"id": "TestCreate1"}, "AttributeUpdates": {"number": {"Value": [{"test1": "val1", "key2": "val2"}]}}}}'</code></pre>
-              </li>
-              <li>delete:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
-              </li>
-              <li>add_simulation:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "add_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
-              </li>
-              <li>get_simulation:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "get_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
-              </li>
-              <li>delete_simulation:
-                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
-              </li>
-            </ol>
+            <div class="row">
+                <div class="col-6">
+                    <h4>Send API here:</h4>
+                    <form>
+                        <h5> Get a simulation entry:<button type="button" id = "get_simulation_btn" class="btn btn-primary">Send API</button></h5>
+                        <div class="form-group">
+                            <label for="get_simulation_id">Simulation ID</label>
+                            <textarea class="form-control" id="get_simulation_id" rows="1" placeholder="SimulationId"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label for="get_simulation_content">Select Data Content (multiple with ctrl)</label>
+                          <select multiple class="form-control" id="get_simulation_content" size="15">
+                            <option value="Speed">Speed</option>
+                            <option value="Position">Position</option>
+                            <option value="Direction">Direction</option>
+                            <option value="Yaw">Yaw</option>
+                            <option value="Pitch">Pitch</option>
+                            <option value="Roll">Roll</option>
+                            <option value="Accel">Accel</option>
+                            <option value="ServoAngle">ServoAngle</option>
+                            <option value="CarStatus">CarStatus</option>
+                            <option value="EngineTemperature">EngineTemperature</option>
+                            <option value="RPM">RPM</option>
+                            <option value="Sensor">Sensor</option>
+                            <option value="Event">Event</option>
+                          </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-6">
+                    <h4>Database Response:</h4>
+                    <pre id = "response" class="prettyprint lang-js"></pre>
+                </div>
+            </div>
+            </div>
         </div>
     </div>
 

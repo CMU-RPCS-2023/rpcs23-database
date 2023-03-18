@@ -199,9 +199,9 @@ def lambda_handler(event, context):
         if len(content) == 0: return result
         if "Item" not in result["Object"].keys():
             return result
-        result = result["Object"]["Item"]
         all_data_requested = {}
         all_data_requested["HTTPStatusCode"] = result["HTTPStatusCode"]
+        result = result["Object"]["Item"]
 
         for k in result.keys():
             if k not in ["EventLog", "CarLog", "SensorLog"]:
@@ -209,8 +209,8 @@ def lambda_handler(event, context):
 
         def getFilteredCarLog(k):
             l = {}
-            l['value'] = [data[k] for data in result["Item"]["CarLog"]]
-            l['time'] = [data["Timestamp"] for data in result["Item"]["CarLog"]]
+            l['value'] = [data[k] for data in result["CarLog"]]
+            l['time'] = [data["Timestamp"] for data in result["CarLog"]]
             return l
 
         for entry in ["Speed", "Position", "Direction", "Yaw", "Pitch", "Roll", "Accel", "ServoAngle", "CarStatus", "EngineTemperature", "RPM"]:
