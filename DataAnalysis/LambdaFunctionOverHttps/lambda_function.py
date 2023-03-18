@@ -1,5 +1,6 @@
 import boto3
 import json
+import copy
 
 # define the DynamoDB table that Lambda will connect to
 tableName = "lambda-apigateway"
@@ -10,32 +11,63 @@ dynamo = boto3.resource('dynamodb').Table(tableName)
 print('Loading function')
 
 EVENT_TEMPLATE = {
-    "Timestamp": "2023-03-14T01:03:04",
-    "EventType": "Collision",
-    "Risk": 3,
-    "ErrorMessage": "Hit a tree"
+    "Timestamp": "None",
+    "EventType": "None",
+    "Risk": "None",
+    "ErrorMessage": "None"
+}
+
+SENSOR_TEMPLATE = {
+    "Timestamp": "None",
+    "SensorType": "None",
+    "Value": "None"
 }
 
 CARLOG_TEMPLATE = {
-    "Timestamp": "2023-03-14T01:03:04",
-    "Speed": 30,
-    "Location": {
-        "X": "4.2",
-        "Y": "2.3"
+    "Timestamp": "None",
+    "CarStatus": "None",
+    "Speed": "None",
+    "Position": {
+        "x": "None",
+        "y": "None",
+        "z": "None"
     },
-    "EngineTemperature": 60,
-    "RPM": 3
+    "Yaw": {
+        "x": "None",
+        "y": "None",
+        "z": "None"
+    },
+    "Pitch": {
+        "x": "None",
+        "y": "None",
+        "z": "None"
+    },
+    "Roll": {
+        "x": "None",
+        "y": "None",
+        "z": "None"
+    },
+    "Accel": {
+        "x": "None",
+        "y": "None",
+        "z": "None"
+    },
+    "Direction": "None",
+    "ServoAngle": "None",
+    "EngineTemperature": "None",
+    "RPM": "None"
 }
 
 SIMULATION_TEMPLATE = {
-    "SimulationName": "Sim_1",
-    "SimulationId": -1,
-    "StartTime": "2023-03-14T01:02:03",
-    "EndTime": "2023-03-14T04:05:06",
-    "CarId": -1,
-    "TrackId": -1,
+    "SimulationName": "None",
+    "SimulationId": "None",
+    "StartTime": "None",
+    "EndTime": "None",
+    "CarId": "None",
+    "TrackId": "None",
     "EventLog": [],
-    "CarLog": []
+    "CarLog": [],
+    "SensorLog": []
 }
 
 def lambda_handler(event, context):
@@ -56,7 +88,7 @@ def lambda_handler(event, context):
         # {"operation": "update","payload": {"Key": {"id": "1234ABCD"}}}}
         res = dynamo.get_item(**x)
         status = res["ResponseMetadata"]["HTTPStatusCode"]
-        return {"Item": res["Item"], "HTTPStatusCode": status}
+        return {"Object": res, "HTTPStatusCode": status}
 
     def ddb_update(x):
         # {"operation": "update","payload": {"Key": {"id": "1234ABCD"},"AttributeUpdates": {"number": {"Value": 10}}}}
@@ -75,25 +107,74 @@ def lambda_handler(event, context):
 
     operation = event['operation']
 
-    def getDefaultEvent():
-        res = EVENT_TEMPLATE
+    def getDefaultEvent(payload):
+        res = copy.deepcopy(EVENT_TEMPLATE)
+
+        entries = payload.keys()
+        fixed_entries = res.keys()
+        entries = [entry for entry in entries if entry in fixed_entries]
+
+        for entry in entries:
+            res[entry] = str(payload[entry])
+        
         return res
 
-    def getDefaultCarLog():
-        res = CARLOG_TEMPLATE
+    def getDefaultCarLog(payload):
+        res = copy.deepcopy(CARLOG_TEMPLATE)
+
+        FLOAT3 = ["Position", "Yaw", "Pitch", "Roll", "Accel"]
+        entries = payload.keys()
+        fixed_entries = res.keys()
+        entries = [entry for entry in entries if entry in fixed_entries]
+
+        for entry in entries:
+            if entry in FLOAT3:
+                for axis in [k for k in payload[entry].keys() if k in ["x", "y", "z"]]:
+                    res[entry][axis] = str(payload[entry][axis])
+            else:
+                res[entry] = str(payload[entry])
+
         return res
 
-    def getDefaultSimulation(simId):
-        res = SIMULATION_TEMPLATE
-        res["SimulationId"] = simId
-        res["EventLog"].append(getDefaultEvent())
-        res["CarLog"].append(getDefaultCarLog())
-        res["id"] = str(simId)
+    def getDefaultSensorLog(payload):
+        res = copy.deepcopy(SENSOR_TEMPLATE)
+
+        entries = payload.keys()
+        fixed_entries = res.keys()
+        entries = [entry for entry in entries if entry in fixed_entries]
+
+        for entry in entries:
+            res[entry] = str(payload[entry])
+        
+        return res
+
+    def getDefaultSimulation(payload):
+        res = copy.deepcopy(SIMULATION_TEMPLATE)
+
+        entries = payload.keys()
+        fixed_entries = res.keys()
+        filtered_entries = [entry for entry in entries if entry in fixed_entries]
+
+        for entry in filtered_entries:
+            if entry == "SimulationId":
+                res[entry] = payload[entry]
+                res["id"] = payload["SimulationId"]
+            elif entry == "EventLog":
+                for events in payload[entry]:
+                    res[entry].append(getDefaultEvent(events))
+            elif entry == "CarLog":
+                for events in payload[entry]:
+                    res[entry].append(getDefaultCarLog(events))
+            elif entry == "SensorLog":
+                for events in payload[entry]:
+                    res[entry].append(getDefaultSensorLog(events))
+            else:
+                res[entry] = str(payload[entry])
         return res
 
     def addSimulation(payload):
         simulation = {
-            "Item": getDefaultSimulation(payload['SimulationId'])
+            "Item": getDefaultSimulation(payload)
         }
         return ddb_create(simulation)
 
@@ -103,7 +184,7 @@ def lambda_handler(event, context):
                 "id": str(payload['SimulationId'])
             }
         }
-        return ddb_read(simulation)
+        return filter_data(ddb_read(simulation), [] if 'content' not in payload.keys() else payload['content'])
 
     def deleteSimulation(payload):
         simulation = {
@@ -112,6 +193,37 @@ def lambda_handler(event, context):
             }
         }
         return ddb_delete(simulation)
+
+    # define the functions used to return data for plotting
+    def filter_data(result, content):
+        if len(content) == 0: return result
+        if "Item" not in result["Object"].keys():
+            return result
+        result = result["Object"]["Item"]
+        all_data_requested = {}
+        all_data_requested["HTTPStatusCode"] = result["HTTPStatusCode"]
+
+        for k in result.keys():
+            if k not in ["EventLog", "CarLog", "SensorLog"]:
+                all_data_requested[k] = result[k]
+
+        def getFilteredCarLog(k):
+            l = {}
+            l['value'] = [data[k] for data in result["Item"]["CarLog"]]
+            l['time'] = [data["Timestamp"] for data in result["Item"]["CarLog"]]
+            return l
+
+        for entry in ["Speed", "Position", "Direction", "Yaw", "Pitch", "Roll", "Accel", "ServoAngle", "CarStatus", "EngineTemperature", "RPM"]:
+            if entry in content:
+                all_data_requested[entry] = getFilteredCarLog(entry)
+
+        if "Sensor" in content:
+            all_data_requested[entry] = result["SensorLog"]
+
+        if "Event" in content:
+            all_data_requested[entry] = result["EventLog"]
+
+        return all_data_requested
 
     operations = {
         'create': ddb_create,

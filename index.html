@@ -33,6 +33,12 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="/cmu-18745">Home <span class="sr-only">(current)</span></a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745/simulations.html">Simulations <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745/database.html">Database <span class="sr-only"></span></a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -49,24 +55,31 @@
 
         </div>
         <div class="container">
-            <div class="form-group">
-                <label for="get_simulation">Get Simulation from ID</label>
-                <input class="form-control" id="get_simulation" placeholder="try: 1">
-                <button type="button" id = "get_simulation_btn" class="btn btn-primary">Send API</button>
-            </div>
-            <div class="form-group">
-                <label for="add_simulation">Create Simulation with ID</label>
-                <input class="form-control" id="add_simulation" placeholder="try: 1">
-                <button type="button" id = "add_simulation_btn" class="btn btn-primary">Send API</button>
-            </div>
-            <div class="form-group">
-                <label for="delete_simulation">Delete Simulation with ID</label>
-                <input class="form-control" id="delete_simulation" placeholder="try: 1">
-                <button type="button" id = "delete_simulation_btn" class="btn btn-primary">Send API</button>
-            </div>
-            <div id = "response">
-                
-            </div>
+
+            <h3>Usage:</h3>
+            <ol>
+              <li>create:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "create", "payload": {"Item": {"id": "TestCreate1", "number": 1234}}}'</code></pre>
+              </li>
+              <li>read:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "read", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
+              </li>
+              <li>update:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "update", "payload": {"Key": {"id": "TestCreate1"}, "AttributeUpdates": {"number": {"Value": [{"test1": "val1", "key2": "val2"}]}}}}'</code></pre>
+              </li>
+              <li>delete:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete", "payload": {"Key": {"id": "TestCreate1"}}}'</code></pre>
+              </li>
+              <li>add_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "add_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+              <li>get_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "get_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+              <li>delete_simulation:
+                <pre><code>curl -X POST https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager -d '{"operation": "delete_simulation", "payload": {"SimulationId": 1}}}'</code></pre>
+              </li>
+            </ol>
         </div>
     </div>
 
@@ -74,7 +87,8 @@
 
     <script src="static/js/resourses/jquery-3.5.1.min.js"></script>
     <script src="static/js/resourses/bootstrap.js"></script>
-    <script src="static/js/main-github.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <script src="static/js/main.js"></script>
 </body>
 
 </html>

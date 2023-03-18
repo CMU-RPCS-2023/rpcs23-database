@@ -1,0 +1,99 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>18745 RP Data Analysis Demo</title>
+    <meta name="description" content="18745 RP Data Analysis Demo project page">
+    <meta name="author" content="Jhao-Ting Chen">
+
+    <meta property="og:title" content="18745 RP Data Analysis Demo">
+    <meta property="og:type" content="website">
+    <meta name="description" content="18745 RP Data Analysis Demo project page">
+
+    <link rel="icon" href="/favicon.ico">
+    <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+    <link rel="stylesheet" href="static/css/bootstrap.css">
+    <link rel="stylesheet" href="static/css/index.css">
+</head>
+
+<body>
+    <!-- your content here... -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand">18745 RP Data Analysis Demo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745">Home <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/cmu-18745/simulations.html">Simulations <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cmu-18745/database.html">Database <span class="sr-only"></span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <div style="text-align: center;">
+            <h1>18745 RP Data Analysis Demo</h1>
+            <h3>Get Raw Simulation Data</h3>
+            <div>
+                <div class="alert alert-warning" role="alert" id="server-check-warning" style="display: none; margin: 0px 20px;">
+                    The server is currently not responding (Maybe CORS). <br />
+                </div>
+            </div>
+
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <h4>Send API here:</h4>
+                    <form>
+                        <h5> Get a simulation entry (in json format):<button type="button" id = "get_simulation_btn" class="btn btn-primary">Send API</button></h5>
+                        <div class="form-group">
+                            <label for="get_simulation"></label>
+                            <textarea class="form-control" id="get_simulation" rows="5"></textarea>
+                        </div>
+                    </form>
+                    <form>
+                        <h5> Delete a simulation entry (in json format):<button type="button" id = "delete_simulation_btn" class="btn btn-primary">Send API</button></h5>
+                        <div class="form-group">
+                            <label for="delete_simulation"></label>
+                            <textarea class="form-control" id="delete_simulation" rows="5"></textarea>
+                        </div>
+                    </form>
+                    <form>
+                        <h5> Add a simulation entry (in json format):<button type="button" id = "add_simulation_btn" class="btn btn-primary">Send API</button></h5>
+                        <div class="form-group">
+                            <label for="add_simulation"></label>
+                            <textarea class="form-control" id="add_simulation" rows="10"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-6">
+                    <h4>Database Response:</h4>
+                    <pre id = "response" class="prettyprint lang-js"></pre>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <script src="static/js/resourses/jquery-3.5.1.min.js"></script>
+    <script src="static/js/resourses/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <script src="static/js/simulation.js"></script>
+</body>
+
+</html>
