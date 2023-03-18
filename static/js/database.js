@@ -22,7 +22,6 @@ window.onload = function ()
         'operation': 'echo',
         'payload': 'server is ok'
     };
-    console.log(data)
     $.ajax(ajaxSetting('', data)).done(function(response) {
         console.log(response)
         if (response !== 'server is ok') {
@@ -35,57 +34,45 @@ window.onload = function ()
 }
 
 $('#create_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#create")[0].value)
-    console.log(payload)
     data = {
         "operation": "create",
         "payload": JSON.parse($("#create")[0].value)
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
 
 $('#delete_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#delete")[0].value)
-    console.log(payload)
     data = {
         "operation": "delete",
         "payload": JSON.parse($("#delete")[0].value)
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
 
 $('#read_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#read")[0].value)
-    console.log(payload)
     data = {
         "operation": "read",
         "payload": JSON.parse($("#read")[0].value)
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
 
 $('#update_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#update")[0].value)
-    console.log(payload)
     data = {
         "operation": "update",
         "payload": JSON.parse($("#update")[0].value)
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })

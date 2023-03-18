@@ -22,7 +22,6 @@ window.onload = function ()
         'operation': 'echo',
         'payload': 'server is ok'
     };
-    console.log(data)
     $.ajax(ajaxSetting('', data)).done(function(response) {
         console.log(response)
         if (response !== 'server is ok') {

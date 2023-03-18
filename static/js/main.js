@@ -22,7 +22,6 @@ window.onload = function ()
         'operation': 'echo',
         'payload': 'server is ok'
     };
-    console.log(data)
     $.ajax(ajaxSetting('', data)).done(function(response) {
         console.log(response)
         if (response !== 'server is ok') {
@@ -35,7 +34,6 @@ window.onload = function ()
 }
 
 $('#get_simulation_btn').on('click', function(ev) {
-    console.log(ev.target)
     SimulationId = $("#get_simulation_id")[0].value
     options = $("#get_simulation_content")[0].options
     content = []
@@ -44,8 +42,6 @@ $('#get_simulation_btn').on('click', function(ev) {
             content.push(options[i].value)
         }
     }
-    console.log(SimulationId)
-    console.log(content)
     payload = {
         "SimulationId": SimulationId,
         "content": content
@@ -55,8 +51,41 @@ $('#get_simulation_btn').on('click', function(ev) {
         "payload": payload
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
+
+        item = content[0]
+        supported_graph = ["Speed", "Direction", "ServoAngle", "EngineTemperature", "RPM"]
+        if (supported_graph.indexOf(item) != -1) {
+            $("#graph")[0].style.display = "block"
+            graphData = []
+            graphLabels = []
+            for (i = 0; i < response[item]["value"].length; i++) {
+                graphData.push(
+                    parseInt(response[item]["value"][i])
+                )
+                graphLabels.push(response[item]["time"][i])
+            }
+            const datapoints = {
+                labels: graphLabels,
+                datasets: [{
+                    label: item,
+                    data: graphData,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            };
+            const config = {
+                type: 'line',
+                data: datapoints,
+            };
+            const myChart = new Chart(
+                "graph",
+                config
+            );
+        } else {
+            $("#graph")[0].style.display = "none"
+        }
     })
 })
 

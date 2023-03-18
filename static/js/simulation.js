@@ -22,7 +22,6 @@ window.onload = function ()
         'operation': 'echo',
         'payload': 'server is ok'
     };
-    console.log(data)
     $.ajax(ajaxSetting('', data)).done(function(response) {
         console.log(response)
         if (response !== 'server is ok') {
@@ -102,41 +101,34 @@ window.onload = function ()
 }
 
 $('#get_simulation_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#get_simulation")[0].value)
     data = {
         "operation": "get_simulation",
         "payload": payload
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
 
 $('#add_simulation_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#add_simulation")[0].value)
-    console.log(payload)
     data = {
         "operation": "add_simulation",
         "payload": JSON.parse($("#add_simulation")[0].value)
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
 
 $('#delete_simulation_btn').on('click', function(ev) {
-    console.log(ev.target)
     payload = JSON.parse($("#delete_simulation")[0].value)
     data = {
         "operation": "delete_simulation",
         "payload": payload
     }
     $.ajax(ajaxSetting('', data)).done(function(response) {
-        console.log(response)
         $("#response")[0].innerHTML = JSON.stringify(response, null, 4)
     })
 })
