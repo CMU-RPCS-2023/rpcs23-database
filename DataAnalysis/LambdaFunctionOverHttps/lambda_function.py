@@ -1,6 +1,6 @@
 import boto3
-import json
 import copy
+import numpy as np
 from datetime import datetime
 
 # define the DynamoDB table that Lambda will connect to
@@ -190,6 +190,35 @@ def getDefaultSimulation(payload):
     return True, res
 
 
+def anomaly_detector(orig_data):
+    try:
+        data_list = orig_data['value']
+        time_list = orig_data['time']
+        
+        window_size = 10
+        window = []
+        threshold = 2
+        anomaly = []
+
+        for i, data in enumerate(data_list):
+            window.append(data)
+            if (len(window) == window_size):
+                mean = np.mean(window)
+                std = np.std(window)
+                z_score = (data - mean) / std
+                if abs(z_score) > threshold:
+                    anomaly.append({
+                        "value": data,
+                        "time": time_list[i],
+                        "confidence": z_score})
+                window.pop(0)
+
+        orig_data['anomaly'] = anomaly
+    except:
+        pass
+    return orig_data
+
+
 def lambda_handler(event, context):
     '''Provide an event that contains the following keys:
 
@@ -251,7 +280,7 @@ def lambda_handler(event, context):
                     "id": str(payload['SimulationId'])
                 }
             }
-            return filter_data(ddb_read(simulation), [] if 'content' not in payload.keys() else payload['content'])
+            return filter_data(ddb_read(simulation), [] if 'content' not in payload.keys() else payload['content'], False if 'anomalyDetection' not in payload.keys() else payload['anomalyDetection'])
         except:
             returned_message = {}
             returned_message["HTTPStatusCode"] = 400
@@ -276,7 +305,7 @@ def lambda_handler(event, context):
             return returned_message
 
     # define the functions used to return data for plotting
-    def filter_data(result, content = []):
+    def filter_data(result, content = [], anomaly_detection = False):
         if "Item" not in result["Object"].keys():
             result["ErrorMessage"] = "Simulation not found. Check SimulationId again."
             return result
@@ -287,7 +316,10 @@ def lambda_handler(event, context):
 
         for entry in content:
             try:
-                all_data_requested[entry] = result[entry]
+                if anomaly_detection:
+                    all_data_requested[entry] = anomaly_detector(result[entry])
+                else:
+                    all_data_requested[entry] = result[entry]
             except:
                 all_data_requested = {}
                 all_data_requested["HTTPStatusCode"] = 400
