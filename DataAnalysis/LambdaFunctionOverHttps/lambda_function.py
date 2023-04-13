@@ -1,6 +1,7 @@
 import boto3
 import json
 import copy
+from datetime import datetime
 
 # define the DynamoDB table that Lambda will connect to
 tableName = "lambda-apigateway"
@@ -10,52 +11,38 @@ dynamo = boto3.resource('dynamodb').Table(tableName)
 
 print('Loading function')
 
-EVENT_TEMPLATE = {
-    "Timestamp": "None",
-    "EventType": "None",
-    "Risk": "None",
-    "ErrorMessage": "None"
-}
+DATE_EXPECTED_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
-SENSOR_TEMPLATE = {
-    "Timestamp": "None",
-    "SensorType": "None",
-    "Value": "None"
-}
+DB_ACCEPT_TYPES = [
+    int,
+    str
+]
 
-CARLOG_TEMPLATE = {
-    "Timestamp": "None",
-    "CarStatus": "None",
-    "Speed": "None",
-    "Position": {
-        "x": "None",
-        "y": "None",
-        "z": "None"
-    },
-    "Yaw": {
-        "x": "None",
-        "y": "None",
-        "z": "None"
-    },
-    "Pitch": {
-        "x": "None",
-        "y": "None",
-        "z": "None"
-    },
-    "Roll": {
-        "x": "None",
-        "y": "None",
-        "z": "None"
-    },
-    "Accel": {
-        "x": "None",
-        "y": "None",
-        "z": "None"
-    },
-    "Direction": "None",
-    "ServoAngle": "None",
-    "EngineTemperature": "None",
-    "RPM": "None"
+STRING_ENTRIES = [
+    "SimulationName",
+    "SimulationId",
+    "StartTime",
+    "EndTime",
+    "CarId",
+    "TrackId",
+]
+
+LIST_ENTRIES = [
+    "gps"
+]
+
+ENTRY_EXPECTED_TYPES = {
+    "Speed": int,
+    "Accel": int,
+    "CarStatus": int,
+    "Position": dict,
+    "Yaw": dict,
+    "Pitch": dict,
+    "Roll": dict,
+    "Direction": int,
+    "ServoAngle": int,
+    "EngineTemperature": None,
+    "RPM": int
 }
 
 SIMULATION_TEMPLATE = {
@@ -65,10 +52,143 @@ SIMULATION_TEMPLATE = {
     "EndTime": "None",
     "CarId": "None",
     "TrackId": "None",
-    "EventLog": [],
-    "CarLog": [],
-    "SensorLog": []
+    "gps": [],
+    "Speed": {
+        "value": [],
+        "time": []
+    },
+    "Accel": {
+        "value": [],
+        "time": []
+    },
+    "CarStatus": {
+        "value": [],
+        "time": []
+    },
+    "Position": {
+        "value": [],
+        "time": []
+    },
+    "Yaw": {
+        "value": [],
+        "time": []
+    },
+    "Pitch": {
+        "value": [],
+        "time": []
+    },
+    "Roll": {
+        "value": [],
+        "time": []
+    },
+    "Direction": {
+        "value": [],
+        "time": []
+    },
+    "ServoAngle": {
+        "value": [],
+        "time": []
+    },
+    "EngineTemperature": {
+        "value": [],
+        "time": []
+    },
+    "RPM": {
+        "value": [],
+        "time": []
+    },
 }
+
+ENTRY_TEMPLATE = {
+    "value": [],
+    "time": []
+}
+
+def checkEntry(entry_name, payload):
+    if entry_name in STRING_ENTRIES:
+        return True, str(payload)
+    if entry_name in LIST_ENTRIES:
+        try:
+            return True, [str(p) for p in payload]
+        except:
+            return False, f'entry {entry_name} should be a list of strings, instead it got {payload}'
+    else:
+        try:
+            values = payload['value']
+            times = payload['time']
+            if (len(values) != len(times)):
+                return False, f'entry {entry_name} has different lengths of data.'
+            
+            if (len(values) == 0):
+                return_value = {
+                    "value": values,
+                    "time": times
+                }
+                return True, return_value
+            
+            try:
+                expected_type = ENTRY_EXPECTED_TYPES[entry_name]
+            except:
+                expected_type = None
+            if expected_type is None:
+                t = type(values[0])
+                if t in DB_ACCEPT_TYPES:
+                    bad_vals = [type(v) for v in values if type(v) != t]
+                    if len(bad_vals) > 0:
+                        values = [str(v) for v in values]
+                else:
+                    values = [str(v) for v in values]
+            else:
+                bad_vals = [type(v) for v in values if type(v) != expected_type]
+                if len(bad_vals) > 0:
+                    return False, f'entry {entry_name} expects type {expected_type}.'
+                if expected_type is dict:
+                    new_values = []
+                    for value in values:
+                        new_value = {}
+                        for k, v in value.items():
+                            new_value[str(k)] = str(v)
+                        new_values.append(new_value)
+                    values = new_values
+
+            for t in times:
+                try:
+                    datetime.strptime(str(t), DATE_EXPECTED_FORMAT)
+                except:
+                    return False, f'entry {entry_name} has time string format error. Expected: {DATE_EXPECTED_FORMAT}, Got: {t}'
+
+            return_value = {
+                "value": values,
+                "time": times
+            }
+
+            return True, return_value
+        except:
+            return False, f'entry {entry_name} does not have "value" and "time" as dictionary keys'
+
+
+def getDefaultSimulation(payload):
+    res = copy.deepcopy(SIMULATION_TEMPLATE)
+
+    entries = payload.keys()
+    fixed_entries = res.keys()
+    filtered_entries = [entry for entry in entries if entry in fixed_entries]
+
+    if "SimulationId" not in filtered_entries:
+        return False, f'"SimulationId" not provided, cannot create a new simulation.'
+
+    for entry in filtered_entries:
+        if entry == "SimulationId":
+            res[entry] = payload[entry]
+            res["id"] = payload["SimulationId"]
+        else:
+            success, value = checkEntry(entry, payload[entry], )
+            if success:
+                res[entry] = value
+            else:
+                return False,  f'entry {entry} error: {value}'
+    return True, res
+
 
 def lambda_handler(event, context):
     '''Provide an event that contains the following keys:
@@ -107,121 +227,73 @@ def lambda_handler(event, context):
 
     operation = event['operation']
 
-    def getDefaultEvent(payload):
-        res = copy.deepcopy(EVENT_TEMPLATE)
-
-        entries = payload.keys()
-        fixed_entries = res.keys()
-        entries = [entry for entry in entries if entry in fixed_entries]
-
-        for entry in entries:
-            res[entry] = str(payload[entry])
-        
-        return res
-
-    def getDefaultCarLog(payload):
-        res = copy.deepcopy(CARLOG_TEMPLATE)
-
-        FLOAT3 = ["Position", "Yaw", "Pitch", "Roll", "Accel"]
-        entries = payload.keys()
-        fixed_entries = res.keys()
-        entries = [entry for entry in entries if entry in fixed_entries]
-
-        for entry in entries:
-            if entry in FLOAT3:
-                for axis in [k for k in payload[entry].keys() if k in ["x", "y", "z"]]:
-                    res[entry][axis] = str(payload[entry][axis])
-            else:
-                res[entry] = str(payload[entry])
-
-        return res
-
-    def getDefaultSensorLog(payload):
-        res = copy.deepcopy(SENSOR_TEMPLATE)
-
-        entries = payload.keys()
-        fixed_entries = res.keys()
-        entries = [entry for entry in entries if entry in fixed_entries]
-
-        for entry in entries:
-            res[entry] = str(payload[entry])
-        
-        return res
-
-    def getDefaultSimulation(payload):
-        res = copy.deepcopy(SIMULATION_TEMPLATE)
-
-        entries = payload.keys()
-        fixed_entries = res.keys()
-        filtered_entries = [entry for entry in entries if entry in fixed_entries]
-
-        for entry in filtered_entries:
-            if entry == "SimulationId":
-                res[entry] = payload[entry]
-                res["id"] = payload["SimulationId"]
-            elif entry == "EventLog":
-                for events in payload[entry]:
-                    res[entry].append(getDefaultEvent(events))
-            elif entry == "CarLog":
-                for events in payload[entry]:
-                    res[entry].append(getDefaultCarLog(events))
-            elif entry == "SensorLog":
-                for events in payload[entry]:
-                    res[entry].append(getDefaultSensorLog(events))
-            else:
-                res[entry] = str(payload[entry])
-        return res
 
     def addSimulation(payload):
-        simulation = {
-            "Item": getDefaultSimulation(payload)
-        }
-        return ddb_create(simulation)
+        success, simulation = getDefaultSimulation(payload)
+        if success:
+            simulation = {
+                "Item": simulation
+            }
+            returned_message = ddb_create(simulation)
+            if returned_message["HTTPStatusCode"] == 200:
+                returned_message["Message"] = "Success"
+            return returned_message
+        else:
+            returned_message = {}
+            returned_message["HTTPStatusCode"] = 400
+            returned_message["ErrorMessage"] = simulation
+            return returned_message
 
     def getSimulation(payload):
-        simulation = {
-            "Key": {
-                "id": str(payload['SimulationId'])
+        try:
+            simulation = {
+                "Key": {
+                    "id": str(payload['SimulationId'])
+                }
             }
-        }
-        return filter_data(ddb_read(simulation), [] if 'content' not in payload.keys() else payload['content'])
+            return filter_data(ddb_read(simulation), [] if 'content' not in payload.keys() else payload['content'])
+        except:
+            returned_message = {}
+            returned_message["HTTPStatusCode"] = 400
+            returned_message["ErrorMessage"] = "Expected to have \"SimulationId\""
+            return returned_message
 
     def deleteSimulation(payload):
-        simulation = {
-            "Key": {
-                "id": str(payload['SimulationId'])
+        try:
+            simulation = {
+                "Key": {
+                    "id": str(payload['SimulationId'])
+                }
             }
-        }
-        return ddb_delete(simulation)
+            returned_message = ddb_delete(simulation)
+            if returned_message["HTTPStatusCode"] == 200:
+                returned_message["Message"] = "Success"
+            return returned_message
+        except:
+            returned_message = {}
+            returned_message["HTTPStatusCode"] = 400
+            returned_message["ErrorMessage"] = "Expected to have \"SimulationId\""
+            return returned_message
 
     # define the functions used to return data for plotting
-    def filter_data(result, content):
-        if len(content) == 0: return result
+    def filter_data(result, content = []):
         if "Item" not in result["Object"].keys():
+            result["ErrorMessage"] = "Simulation not found. Check SimulationId again."
             return result
+        if len(content) == 0: return result["Object"]["Item"]
         all_data_requested = {}
         all_data_requested["HTTPStatusCode"] = result["HTTPStatusCode"]
         result = result["Object"]["Item"]
 
-        for k in result.keys():
-            if k not in ["EventLog", "CarLog", "SensorLog"]:
-                all_data_requested[k] = result[k]
-
-        def getFilteredCarLog(k):
-            l = {}
-            l['value'] = [data[k] for data in result["CarLog"]]
-            l['time'] = [data["Timestamp"] for data in result["CarLog"]]
-            return l
-
-        for entry in ["Speed", "Position", "Direction", "Yaw", "Pitch", "Roll", "Accel", "ServoAngle", "CarStatus", "EngineTemperature", "RPM"]:
-            if entry in content:
-                all_data_requested[entry] = getFilteredCarLog(entry)
-
-        if "Sensor" in content:
-            all_data_requested[entry] = result["SensorLog"]
-
-        if "Event" in content:
-            all_data_requested[entry] = result["EventLog"]
+        for entry in content:
+            try:
+                all_data_requested[entry] = result[entry]
+            except:
+                all_data_requested = {}
+                all_data_requested["HTTPStatusCode"] = 400
+                all_data_requested["ErrorMessage"] = f'Item does not contain entry: {entry}, see "Item" for more details.'
+                all_data_requested["Item"] = result
+                return all_data_requested
 
         return all_data_requested
 
