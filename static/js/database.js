@@ -31,6 +31,19 @@ window.onload = function ()
         console.log(error)
         document.getElementById('server-check-warning').style.display = 'block'
     })
+
+    $('#create')[0].value = JSON.stringify(
+        {"Item": {"id": "TestCreate1", "number": 1234}}
+    , null, 4)
+    $('#delete')[0].value = JSON.stringify(
+        {"Key": {"id": "TestCreate1"}}
+    , null, 4)
+    $('#read')[0].value = JSON.stringify(
+        {"Key": {"id": "TestCreate1"}}
+    , null, 4)
+    $('#update')[0].value = JSON.stringify(
+        {"Key": {"id": "TestCreate1"}, "AttributeUpdates": {"number": {"Value": [{"test1": "val1", "key2": "val2"}]}}}
+    , null, 4)
 }
 
 $('#create_btn').on('click', function(ev) {
