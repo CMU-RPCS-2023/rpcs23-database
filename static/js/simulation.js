@@ -457,7 +457,8 @@ window.onload = function ()
     }, null, 4)
     $("#get_simulation_filtered")[0].value = JSON.stringify({
         "SimulationId": "sim0",
-        "content": ["Speed", "gps", "Accel"]
+        "content": ["Speed", "gps", "Accel"],
+        "anomalyDetection": 1
     }, null, 4)
     $("#delete_simulation")[0].value = JSON.stringify({
         "SimulationId": "sim0",

@@ -44,7 +44,8 @@ $('#get_simulation_btn').on('click', function(ev) {
     }
     payload = {
         "SimulationId": SimulationId,
-        "content": content
+        "content": content,
+        "anomalyDetection": 1
     }
     data = {
         "operation": "get_simulation",
