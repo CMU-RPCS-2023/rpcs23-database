@@ -253,6 +253,20 @@ def lambda_handler(event, context):
 
     def echo(x):
         return x
+    
+    def searchId(x):
+        response = dynamo.scan(ProjectionExpression="id")
+        items = response['Items']
+        while 'LastEvaluatedKey' in response:
+            response = dynamo.scan(ExclusiveStartKey=response['LastEvaluatedKey'], ProjectionExpression="id")
+            items.extend(response['Items'])
+
+        ids = [item['id'] for item in items]
+        returned_message = {}
+        returned_message["IDs"] = ids
+        returned_message["HTTPStatusCode"] = 200
+        returned_message["Message"] = "Success"
+        return returned_message
 
     operation = event['operation']
 
@@ -338,6 +352,7 @@ def lambda_handler(event, context):
         "add_simulation": addSimulation,
         "get_simulation": getSimulation,
         "delete_simulation": deleteSimulation,
+        "search_ids": searchId,
     }
 
     if operation in operations:
