@@ -207,10 +207,12 @@ def anomaly_detector(orig_data):
                 std = np.std(window)
                 z_score = (data - mean) / std
                 if abs(z_score) > threshold:
-                    anomaly.append({
-                        "value": data,
-                        "time": time_list[i],
-                        "confidence": z_score})
+                    # anomaly.append({
+                    #     "value": data,
+                    #     "time": time_list[i],
+                    #     "index": i,
+                    #     "confidence": z_score})
+                    anomaly.append(i)
                 window.pop(0)
 
         orig_data['anomaly'] = anomaly
@@ -255,13 +257,13 @@ def lambda_handler(event, context):
         return x
     
     def searchId(x):
-        response = dynamo.scan(ProjectionExpression="id")
+        response = dynamo.scan(ProjectionExpression="SimulationId")
         items = response['Items']
         while 'LastEvaluatedKey' in response:
-            response = dynamo.scan(ExclusiveStartKey=response['LastEvaluatedKey'], ProjectionExpression="id")
+            response = dynamo.scan(ExclusiveStartKey=response['LastEvaluatedKey'], ProjectionExpression="SimulationId")
             items.extend(response['Items'])
 
-        ids = [item['id'] for item in items]
+        ids = [item['SimulationId'] for item in items if len(item.keys())]
         returned_message = {}
         returned_message["IDs"] = ids
         returned_message["HTTPStatusCode"] = 200
@@ -323,25 +325,35 @@ def lambda_handler(event, context):
         if "Item" not in result["Object"].keys():
             result["ErrorMessage"] = "Simulation not found. Check SimulationId again."
             return result
-        if len(content) == 0: return result["Object"]["Item"]
         all_data_requested = {}
         all_data_requested["HTTPStatusCode"] = result["HTTPStatusCode"]
         result = result["Object"]["Item"]
 
-        for entry in content:
-            try:
-                if anomaly_detection:
-                    all_data_requested[entry] = anomaly_detector(result[entry])
-                else:
-                    all_data_requested[entry] = result[entry]
-            except:
-                all_data_requested = {}
-                all_data_requested["HTTPStatusCode"] = 400
-                all_data_requested["ErrorMessage"] = f'Item does not contain entry: {entry}, see "Item" for more details.'
-                all_data_requested["Item"] = result
-                return all_data_requested
+        if len(content) == 0: 
+            for k, v in result.items():
+                try:
+                    if anomaly_detection:
+                        all_data_requested[k] = anomaly_detector(v)
+                    else:
+                        all_data_requested[k] = v
+                except:
+                    all_data_requested[k] = v
+            return all_data_requested
+        else:
+            for entry in content:
+                try:
+                    if anomaly_detection:
+                        all_data_requested[entry] = anomaly_detector(result[entry])
+                    else:
+                        all_data_requested[entry] = result[entry]
+                except:
+                    all_data_requested = {}
+                    all_data_requested["HTTPStatusCode"] = 400
+                    all_data_requested["ErrorMessage"] = f'Item does not contain entry: {entry}, see "Item" for more details.'
+                    all_data_requested["Item"] = result
+                    return all_data_requested
 
-        return all_data_requested
+            return all_data_requested
 
     operations = {
         'create': ddb_create,
