@@ -230,12 +230,18 @@ import time
 
 url = 'https://fwo91hdzog.execute-api.us-east-1.amazonaws.com/test/dynamodbmanager'
 
+ii = 0
 for index in range(num_simulations_test):
-    simulation_data = generate_simulation_data(index)
+    simulation_data = generate_simulation_data(ii)
+    print(simulation_data["SimulationId"])
     # Save the data into a JSON file
     # json.dump(simulation_data, outfile, indent=2)
     data = {'operation': 'add_simulation', 'payload': simulation_data}
     response = requests.post(url, data=json.dumps(data))
     print(response.status_code)
     print(response.json())
-    time.sleep(2)
+    if "errorMessage" in response.json().keys():
+        print("here")
+        ii -= 1
+    ii += 1
+    time.sleep(4)

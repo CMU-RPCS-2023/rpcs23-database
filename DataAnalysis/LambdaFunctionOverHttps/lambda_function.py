@@ -3,6 +3,8 @@ import copy
 import numpy as np
 from datetime import datetime
 
+import pandas as pd
+
 # define the DynamoDB table that Lambda will connect to
 tableName = "lambda-apigateway"
 
@@ -167,6 +169,54 @@ def checkEntry(entry_name, payload):
             return False, f'entry {entry_name} does not have "value" and "time" as dictionary keys'
 
 
+
+def generate_statistics(simulation):
+
+    for k, v in simulation.items():
+        try:
+            value = v['value']
+            time = v['time']
+            value_df = pd.DataFrame(value, columns=['value'])
+            
+            mean = value_df['value'].mean()
+            std = value_df['value'].std()
+            var = value_df['value'].var()
+            median = value_df['value'].median()
+            mode = float(value_df['value'].mode()[0])
+            minimum = value_df['value'].min()
+            maximum = value_df['value'].max()
+            autocorr = value_df['value'].autocorr()
+            sma_period_3 = list(value_df.rolling(window=3).mean()['value'])
+            sma_period_10 = list(value_df.rolling(window=10).mean()['value'])
+            smstd_period_3 = list(value_df.rolling(window=3).std()['value'])
+            smstd_period_10 = list(value_df.rolling(window=10).std()['value'])
+
+            stats = {
+                'mean': mean,
+                'std': std,
+                'var': var,
+                'median': median,
+                'mode': mode,
+                'minimum': minimum,
+                'maximum': maximum,
+                'autocorr': autocorr,
+                'sma_period_3': sma_period_3,
+                'sma_period_10': sma_period_10,
+                'smstd_period_3': smstd_period_3,
+                'smstd_period_10': smstd_period_10
+            }
+
+            for statsk, statsv in stats.items():
+                stats[statsk] = str(statsv)
+                
+            simulation[k]['stats'] = stats
+
+        except:
+            continue
+    return simulation
+            
+
+
 def getDefaultSimulation(payload):
     res = copy.deepcopy(SIMULATION_TEMPLATE)
 
@@ -187,6 +237,8 @@ def getDefaultSimulation(payload):
                 res[entry] = value
             else:
                 return False,  f'entry {entry} error: {value}'
+            
+    res = generate_statistics(res)
     return True, res
 
 
