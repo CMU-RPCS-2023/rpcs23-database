@@ -1,11 +1,12 @@
 import random
 import json
 from datetime import datetime, timedelta
+import math
 
 # Set how much simulation file to generate
 num_simulations_test = 50
 # Set how much simulation data to generate in one file
-number_data = 120
+number_data = 100
 
 gps_default_data =      [
           "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47",
@@ -126,6 +127,28 @@ def generate_gps(num_positions):
     return gps_data
 
 
+def generate_positions(num_points):
+    radius = 2
+    center_x = 3.5
+    center_y = 3.5
+
+    data_points = []
+    for i in range(num_points):
+        theta = i * (2 * math.pi / num_points)
+        x_perturb = random.uniform(-0.1, 0.1)
+        y_perturb = random.uniform(-0.1, 0.1)
+        r_perturb = random.uniform(-0.1, 0.1)
+        x = (radius + r_perturb) * math.cos(theta) + (center_x + x_perturb)
+        y = (radius + r_perturb) * math.sin(theta) + (center_y + y_perturb)
+        
+        # Ensure x and y are within the range of (0,0) and (7,7)
+        x = max(0, min(x, 7))
+        y = max(0, min(y, 7))
+        
+        data_points.append({"X": "{:.2f}".format(x), "Y": "{:.2f}".format(y)})
+
+    return data_points
+
 def generate_xyz(num_positions):
     positions = []
     X = round(random.uniform(0, 1), 2)
@@ -218,7 +241,7 @@ def generate_simulation_data(index):
     simulation["EngineTemperature"]["value"] = generate_value(
         number_data, -15, 15)
     simulation["RPM"]["value"] = generate_value(number_data, -10, 10)
-    simulation["Position"]["value"] = generate_xyz(number_data)
+    simulation["Position"]["value"] = generate_positions(number_data)
     simulation["Yaw"]["value"] = generate_xyz(number_data)
     simulation["Pitch"]["value"] = generate_xyz(number_data)
     simulation["Roll"]["value"] = generate_xyz(number_data)
